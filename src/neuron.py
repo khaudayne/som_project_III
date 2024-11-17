@@ -3,16 +3,9 @@ import numpy as np
 from distance import select_closest
 
 def generate_network(size):
-    """
-    Generate a neuron network of a given size.
-
-    Return a vector of two dimensional points in the interval [0,1].
-    """
     return np.random.rand(size, 2)
 
 def get_neighborhood(center, radix, domain):
-    """Get the range gaussian of given radix around a center index."""
-
     # Impose an upper bound on the radix to prevent NaN and blocks
     if radix < 1:
         radix = 1
@@ -24,10 +17,11 @@ def get_neighborhood(center, radix, domain):
     # Compute Gaussian distribution around the given center
     return np.exp(-(distances*distances) / (2*(radix*radix)))
 
+# cities là dataframe, network là mạng random ngẫu nhiên ban đầu (hay là đường đi cho robot ban đầu)
 def get_route(cities, network):
-    """Return the route computed by a network."""
     cities['winner'] = cities[['x', 'y']].apply(
         lambda c: select_closest(network, c),
         axis=1, raw=True)
 
+    # Hàm sort_value sẽ sort các data column theo thuộc tính args, index trả về list [] label column của chúng
     return cities.sort_values('winner').index

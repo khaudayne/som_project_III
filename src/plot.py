@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 
 def plot_network(cities, neurons, name='diagram.png', ax=None):
-    """Plot a graphical representation of the problem"""
     mpl.rcParams['agg.path.chunksize'] = 10000
 
     if not ax:
@@ -24,7 +23,6 @@ def plot_network(cities, neurons, name='diagram.png', ax=None):
         return ax
 
 def plot_route(cities, route, name='diagram.png', ax=None):
-    """Plot a graphical representation of the route obtained"""
     mpl.rcParams['agg.path.chunksize'] = 10000
 
     if not ax:

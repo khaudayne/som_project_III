@@ -2,18 +2,11 @@ import pandas as pd
 import numpy as np
 
 def read_tsp(filename):
-    """
-    Read a file in .tsp format into a pandas DataFrame
-
-    The .tsp files can be found in the TSPLIB project. Currently, the library
-    only considers the possibility of a 2D map.
-    """
     with open(filename) as f:
         node_coord_start = None
         dimension = None
         lines = f.readlines()
 
-        # Obtain the information about the .tsp
         i = 0
         while not dimension or not node_coord_start:
             line = lines[i]
@@ -43,13 +36,6 @@ def read_tsp(filename):
         return cities
 
 def normalize(points):
-    """
-    Return the normalized version of a given vector of points.
-
-    For a given array of n-dimensions, normalize each dimension by removing the
-    initial offset and normalizing the points in a proportional interval: [0,1]
-    on y, maintining the original ratio on x.
-    """
     ratio = (points.x.max() - points.x.min()) / (points.y.max() - points.y.min()), 1
     ratio = np.array(ratio) / max(ratio)
     norm = points.apply(lambda c: (c - c.min()) / (c.max() - c.min()))
