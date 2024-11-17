@@ -5,21 +5,25 @@ import numpy as np
 from io_helper import read_tsp, normalize
 from neuron import generate_network, get_neighborhood, get_route
 from distance import select_closest, route_distance
-from plot import plot_network, plot_route
-
+from plot import plot_network, plot_route, plot_map_circle
+import create_circle
 def main():
     if len(argv) != 2:
         return -1
 
-    problem = read_tsp(argv[1])
+    problem, robots = read_tsp(argv[1])
+    normalize(problem)
+    print(robots)
+    print(problem)
 
-    route = som(problem, 100000)
+    plot_map_circle(problem)
+    # route = som(problem, 100000)
 
-    problem = problem.reindex(route)
+    # problem = problem.reindex(route)
 
-    distance = route_distance(problem)
+    # distance = route_distance(problem)
 
-    print('Route found of length {}'.format(distance))
+    # print('Route found of length {}'.format(distance))
 
 
 def som(problem, iterations, learning_rate=0.8):
