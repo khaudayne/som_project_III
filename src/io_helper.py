@@ -53,6 +53,7 @@ def read_tsp(filename):
 
         # cities.set_index('city', inplace=True)
         cities[['x', 'y', 'r']] = cities[['x', 'y', 'r']] / create_circle.MAX_SIZE
+        robots[['budget']] = robots[['budget']] / create_circle.MAX_SIZE
         return cities[['x', 'y', 'r', 'reward']].values.tolist(), robots[['budget']].values.tolist()
 
 def normalize(cities):

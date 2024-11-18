@@ -5,7 +5,7 @@ import math
 import random
 from io_helper import read_tsp, normalize
 from neuron import generate_network, adaption, regeneration, cal_score
-from distance import select_closest, route_distance, cal_cost
+from distance import cal_cost
 from plot import plot_network, plot_route, plot_map_circle
 import create_circle
 def main():
@@ -18,6 +18,8 @@ def main():
     print("\nRoutes: ")
     print(routes)
 
+    plot_map_circle(problem, routes)
+
 
 def som(problem, robots, iterations, learning_rate=0.002):
     sigma = 1
@@ -27,7 +29,7 @@ def som(problem, robots, iterations, learning_rate=0.002):
     print("\nRobots: ")
     print(robots)
 
-    # Generate an adequate network of neurons:
+    # Tạo 1 network ~ con đường ngẫu nhiên của các robot lúc đầu
     network = generate_network(robots, cities)
    
     print("\nNetwork: ")
@@ -67,9 +69,9 @@ def som(problem, robots, iterations, learning_rate=0.002):
             network_select_robot = []
             for robot in range(number_robot):
                 tmp_network = adaption(network[robot], city, sigma)
-                tmp_cost_robot = cal_cost(network[robot])
-                if cost_select_robot == -1 or cost_select_robot > tmp_cost_robot / robots[robot]:
-                    cost_select_robot = tmp_cost_robot / robots[robot]
+                tmp_cost_robot = cal_cost(tmp_network)
+                if cost_select_robot == -1 or cost_select_robot > tmp_cost_robot / robots[robot][0]:
+                    cost_select_robot = tmp_cost_robot / robots[robot][0]
                     idx_select_robot = robot
                     network_select_robot = tmp_network
             
@@ -86,6 +88,8 @@ def som(problem, robots, iterations, learning_rate=0.002):
             for k in range(number_robot):
                 result_network[k] = list(network[k])
         sigma = sigma * (1 - i * learning_rate)
+        if sigma <= 0:
+            break
     else:
         print('Completed {} iterations.'.format(iterations))
 
