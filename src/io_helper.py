@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import math
 import create_circle
 def read_tsp(filename):
     with open(filename) as f:
@@ -44,19 +45,28 @@ def read_tsp(filename):
             f,
             skiprows=node_coord_start + 1,
             sep=' ',
-            names=['city', 'x', 'y', 'r'],
-            dtype={'city': str, 'x': np.float64, 'y': np.float64, 'r': np.float64},
+            names=['city', 'x', 'y', 'r', 'reward'],
+            dtype={'city': str, 'x': np.float64, 'y': np.float64, 'r': np.float64, 'reward': np.float64},
             header=None,
             nrows=dimension
         )
 
         # cities.set_index('city', inplace=True)
+        cities[['x', 'y', 'r']] = cities[['x', 'y', 'r']] / create_circle.MAX_SIZE
+        return cities[['x', 'y', 'r', 'reward']].values.tolist(), robots[['budget']].values.tolist()
 
-        return cities[['x', 'y', 'r']].to_numpy(), robots[['budget']].to_numpy()
-
-def normalize(points):
+def normalize(cities):
     # ratio = (points.x.max() - points.x.min()) / (points.y.max() - points.y.min()), 1
     # ratio = np.array(ratio) / max(ratio)
     # norm = points.apply(lambda c: (c - c.min()) / (c.max() - c.min()))
     # return norm.apply(lambda p: ratio * p, axis=1)
-    points[:,:] /= create_circle.MAX_SIZE
+    tmp_gcd = math.ceil(cities[0][3])
+    for i in range(len(cities)):
+        cities[i][3] = math.ceil(cities[i][3])
+        tmp_gcd = math.gcd(tmp_gcd, cities[i][3])
+    size = len(cities)
+    for i in range(size):
+        number_duplicate = math.ceil(cities[i][3] / tmp_gcd)
+        for j in range(number_duplicate):
+            copy_list = list(cities[i])
+            cities.append(copy_list)

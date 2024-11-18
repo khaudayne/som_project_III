@@ -1,10 +1,11 @@
 from sys import argv
 
 import numpy as np
-
+import math
+import random
 from io_helper import read_tsp, normalize
-from neuron import generate_network, get_neighborhood, get_route
-from distance import select_closest, route_distance
+from neuron import generate_network, adaption, regeneration, cal_score
+from distance import select_closest, route_distance, cal_cost
 from plot import plot_network, plot_route, plot_map_circle
 import create_circle
 def main():
@@ -12,70 +13,83 @@ def main():
         return -1
 
     problem, robots = read_tsp(argv[1])
-    normalize(problem)
-    print(robots)
-    print(problem)
 
-    plot_map_circle(problem)
-    # route = som(problem, 100000)
-
-    # problem = problem.reindex(route)
-
-    # distance = route_distance(problem)
-
-    # print('Route found of length {}'.format(distance))
+    routes = som(problem, robots, 100000)
+    print("\nRoutes: ")
+    print(routes)
 
 
-def som(problem, iterations, learning_rate=0.8):
-
-    # Obtain the normalized set of cities (w/ coord in [0,1])
+def som(problem, robots, iterations, learning_rate=0.002):
+    sigma = 1
+    # Không chỉnh sửa thằng này, tránh việc sai dữ liệu problem ban đầu
     cities = problem.copy()
 
-    cities[['x', 'y']] = normalize(cities[['x', 'y']])
-
-    # The population size is 8 times the number of cities
-    n = cities.shape[0] * 10
+    print("\nRobots: ")
+    print(robots)
 
     # Generate an adequate network of neurons:
-    network = generate_network(n)
-    print('Network of {} neurons created. Starting the iterations:'.format(n))
+    network = generate_network(robots, cities)
+   
+    print("\nNetwork: ")
+    print(network)
+
+    normalize(cities)
+    print("\nCities: ")
+    print(cities)
+ 
+    number_city = len(cities)
+    number_robot = len(robots)
+
+    cost = [0] * number_robot
+    for i in range(number_robot):
+        cost[i] = cal_cost(network[i])
+    print("\nCost:")
+    print(cost)
+
+    result_network = [[]] * number_robot
+    max_score = -1
+
+    print('\nNetwork of {} neurons created. Starting the iterations:'.format(len(robots)))
 
     for i in range(iterations):
         if not i % 100:
             print('\t> Iteration {}/{}'.format(i, iterations), end="\r")
-        # Choose a random city
-        city = cities.sample(1)[['x', 'y']].values
-        winner_idx = select_closest(network, city)
-        # Generate a filter that applies changes to the winner's gaussian
-        gaussian = get_neighborhood(winner_idx, n//10, network.shape[0])
-        # Update the network's weights (closer to the city)
+        
+        # Permutation các thành phố
+        per = list(range(number_city))
+        random.shuffle(per)
+        for j in range(number_city):
+            city = cities[per[j]]
 
-        network += gaussian[:,np.newaxis] * learning_rate * (city - network)
-        # Decay the variables
-        learning_rate = learning_rate * 0.99997
-        n = n * 0.9997
+            # Các biến lưu lại giá trị cần thiết của robot có path tốt nhất
+            idx_select_robot = -1
+            cost_select_robot = -1
+            network_select_robot = []
+            for robot in range(number_robot):
+                tmp_network = adaption(network[robot], city, sigma)
+                tmp_cost_robot = cal_cost(network[robot])
+                if cost_select_robot == -1 or cost_select_robot > tmp_cost_robot / robots[robot]:
+                    cost_select_robot = tmp_cost_robot / robots[robot]
+                    idx_select_robot = robot
+                    network_select_robot = tmp_network
+            
+            # Điều chỉnh lại con đường cho robot được chọn
+            if idx_select_robot != -1 and cost_select_robot < 1:
+                network[idx_select_robot] = network_select_robot
 
-        # Check for plotting interval
-        if not i % 1000:
-            plot_network(cities, network, name='diagrams/{:05d}.png'.format(i))
+        # Loại bỏ các điểm thừa trên mạng qua mỗi epoch
+        regeneration(network)
 
-        # Check if decayed.
-        if n < 1:
-            print('Radius has completely decayed, finishing execution',
-            'at {} iterations'.format(i))
-            break
-        if learning_rate < 0.001:
-            print('Learning rate has completely decayed, finishing execution',
-            'at {} iterations'.format(i))
-            break
+        tmp_score = cal_score(problem, network)  
+        if max_score == -1 or max_score < tmp_score:
+            # Lưu lời giải tốt nhất
+            for k in range(number_robot):
+                result_network[k] = list(network[k])
+        sigma = sigma * (1 - i * learning_rate)
     else:
         print('Completed {} iterations.'.format(iterations))
 
-    plot_network(cities, network, name='diagrams/final.png')
-
-    route = get_route(cities, network)
-    plot_route(cities, route, 'diagrams/route.png')
-    return route
+    return result_network
 
 if __name__ == '__main__':
     main()
