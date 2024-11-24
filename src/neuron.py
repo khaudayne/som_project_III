@@ -10,7 +10,7 @@ def generate_network(robots, problem, multi = 2):
     network = [[]] * number_robot
     for i in range(number_robot):
         tmp_list = []
-        angle = math.pi / number_waypoint
+        angle = 2 * math.pi / number_waypoint
         radius = problem[i][2] * multi
         for j in range(number_waypoint):
             tmp_list.append(
@@ -53,40 +53,52 @@ def adaption(path, city, sigma):
     # Tìm way_point nằm trên path gần city nhất
     idx_waypoint, sqr_dis_waypoint, z_nearest_waypoint = find_nearest_way_point(tmp_network, city)
 
-    final_waypoint = tmp_network[idx_waypoint]
-    final_z_nearest = z_nearest_waypoint
-
     neareast_point_in_path = None
     idx_insert = None
     z_nearest_path = None
-    sqr_dis_point_in_path = 2 # Đặt là 2 vì map được normalize về [0; 1]
+    sqr_dis_point_in_path = -1
 
     if sqr_dis_waypoint > 0: # Trường hợp không có waypoint nào nằm trong region thì mới xét tới cạnh
         neareast_point_in_path, sqr_dis_point_in_path, idx_insert, z_nearest_path = find_nearest_path_point(tmp_network, city)
 
         # Trường hợp điểm nằm trên cạnh gần city hơn điểm nằm trên path
         # => Chèn điểm mới vào tmp_network tại idx_insert
-        if sqr_dis_point_in_path < sqr_dis_waypoint:
+        if sqr_dis_point_in_path != -1 and sqr_dis_point_in_path < sqr_dis_waypoint:
+            print("Chen them diem moi")
             tmp_network.insert(idx_insert, neareast_point_in_path)
-            final_waypoint = neareast_point_in_path
-            final_z_nearest = z_nearest_path
+            idx_waypoint = idx_insert
+            z_nearest_waypoint = z_nearest_path
 
-    for i in range(len(tmp_network)):
-        move_toward(tmp_network[i], final_waypoint, final_z_nearest, sigma)
+    # Trong trường hợp z_nearest ở sát biên của đường tròn => Di chuyển lại gần tâm hơn
+    z_nearest_waypoint = fix_distance_z_nearest(z_nearest_waypoint, city)
+    move_toward(tmp_network, idx_waypoint, z_nearest_waypoint, sigma)
     return tmp_network
 
-def move_toward(point, final_waypoint, final_z_nearest, sigma):
-    sqr_l = (final_waypoint[0] - point[0]) ** 2 + (final_waypoint[1] - point[1]) ** 2
-    f_factor = function_factor(sqr_l, sigma)
-    point[0] = point[0] + f_factor * (final_z_nearest[0] - point[0])
-    point[1] = point[1] + f_factor * (final_z_nearest[1] - point[1])
+def fix_distance_z_nearest(z_nearest, city, threshold = 4 / 5):
+    scale = ((z_nearest[0] - city[0]) ** 2 + (z_nearest[1] - city[1]) ** 2) / (city[2] ** 2)
+    if(scale <= (threshold ** 2)): 
+        return z_nearest
+    z_nearest[0] = z_nearest[0] + (city[0] - z_nearest[0]) * (1 - threshold)
+    z_nearest[1] = z_nearest[1] + (city[1] - z_nearest[1]) * (1 - threshold)
+    return z_nearest
+ 
+def move_toward(path, idx_waypoint, final_z_nearest, sigma):
+    sz = len(path)
+    for i in range(sz):
+        l = min(idx_waypoint - i, sz - idx_waypoint + i)
+        factor = function_factor(l, sigma)
+        path[i][0] = path[i][0] + (final_z_nearest[0] - path[i][0]) * factor
+        path[i][1] = path[i][1] + (final_z_nearest[1] - path[i][1]) * factor
 
     
-def function_factor(sqr_l, sigma, landa = 1):
-    sqr_sigma = sigma ** 2
+def function_factor(l, sigma, landa = 1, multi_factor = 1):
+    sqr_sigma = sigma * sigma
+    sqr_l = l * l
+    if sqr_l == 0:
+        return 1
     if sqr_sigma <= 0:
         return 0
-    return landa * math.exp(-sqr_l / sqr_sigma)
+    return landa * math.exp(-sqr_l * multi_factor / sqr_sigma)
 
 # todo: thêm hàm để tái tạo đường qua mỗi epoch => Giảm các điểm thừa
 def regeneration(network):
@@ -112,3 +124,6 @@ def cal_score(problem, network):
         if check[i]:
             score += problem[k][3]
     return score
+
+# Check xoa regeneration
+# Ve them cac waypoint vao map

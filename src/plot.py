@@ -56,12 +56,28 @@ def plot_map_circle(cities, routes, name="diagrams/map_circle.png"):
     axis.set_aspect('equal', adjustable='datalim')
     plt.axis('off')
 
+    
+    for i in range(len(cities)):
+        cities[i][0] /= create_circle.MAX_SIZE
+        cities[i][1] /= create_circle.MAX_SIZE
+        cities[i][2] /= create_circle.MAX_SIZE
+
+    for i in range(len(routes)):
+        for j in range(len(routes[i])):
+            routes[i][j][0] /= create_circle.MAX_SIZE
+            routes[i][j][1] /= create_circle.MAX_SIZE
+
     # Vẽ các region city
     for circle in cities:
         c = patches.Circle((circle[0], circle[1]), circle[2], edgecolor='blue', facecolor='none', linewidth=1)
         axis.scatter(circle[0], circle[1], color='red', zorder=5, s=1)
         axis.add_patch(c)
     
+    # todo : ve them cac diem waypoint cua robot
+    for i in range(len(routes)):
+        for j in range(len(routes[i])):
+            axis.scatter(routes[i][j][0], routes[i][j][1], color='green', zorder=5, s=1)
+
     # Vẽ path của các con robot
     for i in range(len(routes)):
         if len(routes[i]) <= 1:

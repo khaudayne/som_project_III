@@ -44,6 +44,8 @@ def find_nearest_way_point(network, city):
         if min_dis == -1 or min_dis > dis:
             min_dis = dis
             min_idx = i
+        
+        # Trường hợp có 1 điểm trên đường nằm trong region thì trả về luôn
         if min_dis <= 0:
             return min_idx, 0, [network[min_idx][0], network[min_idx][1]]
     z_nearest = find_point_nearest_in_circle(network[min_idx], city)
@@ -55,7 +57,7 @@ def find_nearest_path_point(network, city):
     xt_min = -1
     yt_min = -1
     idx_insert = -1
-    min_dis = 2 # Do đã normalize
+    min_dis = -1 
     for i in range(len(network)):
         A = network[i]
         B = network[i - 1]
@@ -69,17 +71,18 @@ def find_nearest_path_point(network, city):
         dis = (xt_tmp - city[0]) ** 2 + (yt_tmp - city[1]) ** 2
         dis = max(dis - sqr_radius, 0)
 
-        if min_dis > dis:
+        if min_dis == -1 or min_dis > dis:
             min_dis = dis
             xt_min = xt_tmp
             yt_min = yt_tmp
             idx_insert = i
         
-        if min_dis <= 0:
+        # Trường hợp điểm nằm trên path cũng nằm trong region thì return luôn
+        if min_dis <= 0 and idx_insert >= 0:
             return [xt_min, yt_min], 0, idx_insert, [xt_min, yt_min]
         
     # Trường hợp tệ, tất cả các điểm gần nhất đều nằm ngoài đoạn thẳng
-    if xt_min < 0 or yt_min < 0 or min_dis > 1:
-        return None, 2, None, None
+    if xt_min < 0 or yt_min < 0 or min_dis < 0 or idx_insert < 0:
+        return None, -1, None, None
     z_nearest = find_point_nearest_in_circle([xt_min, yt_min], city)
     return [xt_min, yt_min], min_dis, idx_insert, z_nearest

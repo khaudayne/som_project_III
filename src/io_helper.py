@@ -51,23 +51,20 @@ def read_tsp(filename):
             nrows=dimension
         )
 
-        # cities.set_index('city', inplace=True)
-        cities[['x', 'y', 'r']] = cities[['x', 'y', 'r']] / create_circle.MAX_SIZE
-        robots[['budget']] = robots[['budget']] / create_circle.MAX_SIZE
+        # Bỏ localize
+        # cities[['x', 'y', 'r']] = cities[['x', 'y', 'r']] / create_circle.MAX_SIZE
+        # robots[['budget']] = robots[['budget']] / create_circle.MAX_SIZE
+
         return cities[['x', 'y', 'r', 'reward']].values.tolist(), robots[['budget']].values.tolist()
 
 def normalize(cities):
-    # ratio = (points.x.max() - points.x.min()) / (points.y.max() - points.y.min()), 1
-    # ratio = np.array(ratio) / max(ratio)
-    # norm = points.apply(lambda c: (c - c.min()) / (c.max() - c.min()))
-    # return norm.apply(lambda p: ratio * p, axis=1)
     tmp_gcd = math.ceil(cities[0][3])
     for i in range(len(cities)):
         cities[i][3] = math.ceil(cities[i][3])
         tmp_gcd = math.gcd(tmp_gcd, cities[i][3])
     size = len(cities)
     for i in range(size):
-        number_duplicate = math.ceil(cities[i][3] / tmp_gcd)
+        number_duplicate = math.ceil(cities[i][3] / tmp_gcd) - 1
         for j in range(number_duplicate):
             copy_list = list(cities[i])
             cities.append(copy_list)

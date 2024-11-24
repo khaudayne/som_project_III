@@ -1,7 +1,7 @@
 from sys import argv
 
 import numpy as np
-import math
+import copy
 import random
 from io_helper import read_tsp, normalize
 from neuron import generate_network, adaption, regeneration, cal_score
@@ -14,20 +14,25 @@ def main():
 
     problem, robots = read_tsp(argv[1])
 
+    print("\nRobots: ")
+    print(robots)
+
+    print("\Problem: ")
+    print(problem)
+
     routes = som(problem, robots, 100000)
     print("\nRoutes: ")
     print(routes)
 
+    for robot in range(len(routes)):
+        cost = cal_cost(routes[robot])
+        print("Cost of robot {} is: {}".format(robot, cost))
     plot_map_circle(problem, routes)
 
 
 def som(problem, robots, iterations, learning_rate=0.002):
     sigma = 1
-    # Không chỉnh sửa thằng này, tránh việc sai dữ liệu problem ban đầu
-    cities = problem.copy()
-
-    print("\nRobots: ")
-    print(robots)
+    cities = copy.deepcopy(problem)
 
     # Tạo 1 network ~ con đường ngẫu nhiên của các robot lúc đầu
     network = generate_network(robots, cities)
@@ -48,7 +53,7 @@ def som(problem, robots, iterations, learning_rate=0.002):
     print("\nCost:")
     print(cost)
 
-    result_network = [[]] * number_robot
+    result_network = copy.deepcopy(network)
     max_score = -1
 
     print('\nNetwork of {} neurons created. Starting the iterations:'.format(len(robots)))
@@ -84,9 +89,11 @@ def som(problem, robots, iterations, learning_rate=0.002):
 
         tmp_score = cal_score(problem, network)  
         if max_score == -1 or max_score < tmp_score:
+            max_score = tmp_score
+            print("\nMax score is: {}".format(max_score))
             # Lưu lời giải tốt nhất
-            for k in range(number_robot):
-                result_network[k] = list(network[k])
+            result_network = copy.deepcopy(network)
+
         sigma = sigma * (1 - i * learning_rate)
         if sigma <= 0:
             break
