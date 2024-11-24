@@ -56,7 +56,7 @@ def plot_map_circle(cities, routes, name="diagrams/map_circle.png"):
     axis.set_aspect('equal', adjustable='datalim')
     plt.axis('off')
 
-    
+    # Normalize về [0; 1) để vẽ hình
     for i in range(len(cities)):
         cities[i][0] /= create_circle.MAX_SIZE
         cities[i][1] /= create_circle.MAX_SIZE

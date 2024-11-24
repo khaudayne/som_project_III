@@ -13,34 +13,9 @@ def generate_network(robots, problem, multi = 2):
         angle = 2 * math.pi / number_waypoint
         radius = problem[i][2] * multi
         for j in range(number_waypoint):
-            tmp_list.append(
-                [
-                    problem[i][0] + radius * math.sin(angle * j)
-                    , problem[i][1] + radius * math.cos(angle * j)
-                ])
+            tmp_list.append([problem[i][0] + radius * math.sin(angle * j), problem[i][1] + radius * math.cos(angle * j)])
         network[i] = tmp_list
     return network
-
-def get_neighborhood(center, radix, domain):
-    # Impose an upper bound on the radix to prevent NaN and blocks
-    if radix < 1:
-        radix = 1
-
-    # Compute the circular network distance to the center
-    deltas = np.absolute(center - np.arange(domain))
-    distances = np.minimum(deltas, domain - deltas)
-
-    # Compute Gaussian distribution around the given center
-    return np.exp(-(distances*distances) / (2*(radix*radix)))
-
-# cities là dataframe, network là mạng random ngẫu nhiên ban đầu (hay là đường đi cho robot ban đầu)
-def get_route(cities, network):
-    cities['winner'] = cities[['x', 'y']].apply(
-        lambda c: select_closest(network, c),
-        axis=1, raw=True)
-
-    # Hàm sort_value sẽ sort các data column theo thuộc tính args, index trả về list [] label column của chúng
-    return cities.sort_values('winner').index
 
 # Param:
 ## path: network của robot đang xét
@@ -114,9 +89,8 @@ def cal_score(problem, network):
                     continue
 
                 #kiểm tra way_point có nằm trong region view_point của điểm cần quan sát hay không
-                dis = (way_point[0] - problem[k][0])  * (way_point[0] - problem[k][0]) 
-                + (way_point[1] - problem[k][1]) * (way_point[1] - problem[k][1])
-                if dis * dis <= problem[k][2] * problem[k][2]:
+                sqr_dis = (way_point[0] - problem[k][0]) ** 2 + (way_point[1] - problem[k][1]) ** 2
+                if sqr_dis <= problem[k][2] * problem[k][2]:
                     check[k] = True
     
     score = 0

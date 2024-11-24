@@ -16,15 +16,11 @@ def route_distance(cities):
 def cal_cost(path):
     c = 0
     for i in range(len(path)):
-        c += math.sqrt(
-            (path[i][0] - path[i - 1][0]) * (path[i][0] - path[i - 1][0]) 
-            + (path[i][1] - path[i - 1][1]) * (path[i][1] - path[i - 1][1])
-        )
+        c += math.sqrt((path[i][0] - path[i - 1][0]) ** 2 + (path[i][1] - path[i - 1][1]) ** 2)
     return c
 
 def find_point_nearest_in_circle(point, circle):
-    dis = math.sqrt((point[0] - circle[0])  * (point[0] - circle[0]) 
-        + (point[1] - circle[1]) * (point[1] - circle[1]))
+    dis = math.sqrt((point[0] - circle[0]) ** 2 + (point[1] - circle[1]) ** 2)
     scale = (dis - circle[2]) / dis
     return [point[0] + scale * (circle[0] - point[0]), point[1] + scale * (circle[1] - point[1])]
 
@@ -37,9 +33,7 @@ def find_nearest_way_point(network, city):
     min_idx = -1
     for i in range(len(network)):
         way_point = network[i]
-        dis = (way_point[0] - city[0])  * (way_point[0] - city[0]) 
-        + (way_point[1] - city[1]) * (way_point[1] - city[1])
-        
+        dis = (way_point[0] - city[0]) ** 2 + (way_point[1] - city[1]) ** 2
         dis = max(dis - sqr_radius, 0)
         if min_dis == -1 or min_dis > dis:
             min_dis = dis

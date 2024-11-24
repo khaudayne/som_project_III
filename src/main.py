@@ -8,11 +8,12 @@ from neuron import generate_network, adaption, regeneration, cal_score
 from distance import cal_cost
 from plot import plot_network, plot_route, plot_map_circle
 import create_circle
-def main():
-    if len(argv) != 2:
-        return -1
+def main(asset):
+    # if len(argv) != 2:
+    #     return -1
 
-    problem, robots = read_tsp(argv[1])
+    # problem, robots = read_tsp(argv[1])
+    problem, robots = read_tsp(asset)
 
     print("\nRobots: ")
     print(robots)
@@ -102,5 +103,6 @@ def som(problem, robots, iterations, learning_rate=0.002):
 
     return result_network
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()
+main("assets/qa194.tsp")
