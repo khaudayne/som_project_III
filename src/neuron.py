@@ -17,6 +17,18 @@ def generate_network(robots, problem, multi = 2):
         network[i] = tmp_list
     return network
 
+def generate_one_path(network, problem, multi = 2):
+    number_robot = len(network)
+    number_waypoint = math.ceil(len(problem) / number_robot)
+    random_city = random.randint(0, len(problem) - 1)
+    gen_network = []
+    angle = 2 * math.pi / number_waypoint
+    radius = problem[random_city][2] * multi
+    for j in range(number_waypoint):
+        gen_network.append([problem[random_city][0] + radius * math.sin(angle * j), problem[random_city][1] + radius * math.cos(angle * j)])
+    return gen_network
+
+
 # Param:
 ## path: network của robot đang xét
 ## city: thành phố mà robot điều chỉnh hướng . đitoiws
@@ -39,7 +51,6 @@ def adaption(path, city, sigma):
         # Trường hợp điểm nằm trên cạnh gần city hơn điểm nằm trên path
         # => Chèn điểm mới vào tmp_network tại idx_insert
         if sqr_dis_point_in_path != -1 and sqr_dis_point_in_path < sqr_dis_waypoint:
-            print("Chen them diem moi")
             tmp_network.insert(idx_insert, neareast_point_in_path)
             idx_waypoint = idx_insert
             z_nearest_waypoint = z_nearest_path
@@ -76,8 +87,28 @@ def function_factor(l, sigma, landa = 1, multi_factor = 1):
     return landa * math.exp(-sqr_l * multi_factor / sqr_sigma)
 
 # todo: thêm hàm để tái tạo đường qua mỗi epoch => Giảm các điểm thừa
-def regeneration(network):
+def regeneration(network, problem):
+    number_city = len(problem)
+    check = [False] * number_city
+    for i in range(len(network)):
+        path = network[i] 
+        regeneration_network = []
+        for j in range(len(path)):
+            for k in range(number_city):
+                city = problem[k]
+                if check[k]:
+                    continue
+                if ((path[j][0] - city[0]) ** 2 + (path[j][1] - city[1]) ** 2) <= city[2] ** 2:
+                    regeneration_network.append([path[j][0], path[j][1]])
+                    check[k] = True
+
+        network[i] = regeneration_network
+        if len(network[i]) == 0:
+            # Tạo lại 1 đường mới cho robot khi mà đường cũ đã bị xóa hết các điểm
+            network[i] = generate_one_path(network, problem)
+            pass
     pass
+
 
 def cal_score(problem, network):
     check = [False] * len(problem)
@@ -98,6 +129,3 @@ def cal_score(problem, network):
         if check[i]:
             score += problem[k][3]
     return score
-
-# Check xoa regeneration
-# Ve them cac waypoint vao map

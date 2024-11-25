@@ -86,7 +86,7 @@ def som(problem, robots, iterations, learning_rate=0.002):
                 network[idx_select_robot] = network_select_robot
 
         # Loại bỏ các điểm thừa trên mạng qua mỗi epoch
-        regeneration(network)
+        regeneration(network, problem)
 
         tmp_score = cal_score(problem, network)  
         if max_score == -1 or max_score < tmp_score:
