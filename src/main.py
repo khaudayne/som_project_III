@@ -28,6 +28,10 @@ def main(asset):
     for robot in range(len(routes)):
         cost = cal_cost(routes[robot])
         print("Cost of robot {} is: {}".format(robot, cost))
+
+    # Print thêm tổng số các đỉnh đã được tới thăm, điểm số nhận được
+    # Tổng quãng đường đã di chuyển của các con robot
+    # Tô màu city đã được thăm thành màu khác
     plot_map_circle(problem, routes)
 
 
@@ -76,6 +80,8 @@ def som(problem, robots, iterations, learning_rate=0.002):
             for robot in range(number_robot):
                 tmp_network = adaption(network[robot], city, sigma)
                 tmp_cost_robot = cal_cost(tmp_network)
+                # Thay đổi hàm để chọn robot
+                ## => Ưu tiên các con robot có sự thay đổi năng lượng ít hơn?
                 if cost_select_robot == -1 or cost_select_robot > tmp_cost_robot / robots[robot][0]:
                     cost_select_robot = tmp_cost_robot / robots[robot][0]
                     idx_select_robot = robot
@@ -94,6 +100,10 @@ def som(problem, robots, iterations, learning_rate=0.002):
             print("\nMax score is: {}".format(max_score))
             # Lưu lời giải tốt nhất
             result_network = copy.deepcopy(network)
+        else:
+            # todo: đếm xem có bao nhiêu vòng lặp mà lời giải không tốt hơn lời giải đang lưu
+            ## dừng sớm sau khi quá 10 vòng lặp như vậy
+            pass
 
         sigma = sigma * (1 - i * learning_rate)
         if sigma <= 0:
