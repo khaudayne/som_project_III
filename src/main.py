@@ -4,16 +4,12 @@ import numpy as np
 import copy
 import random
 from io_helper import read_tsp, normalize
-from neuron import generate_network, adaption, regeneration, cal_score
+from neuron import generate_network, adaption, regeneration, cal_score, get_list_check_city
 from distance import cal_cost
 from plot import plot_network, plot_route, plot_map_circle
-import create_circle
-def main(asset):
-    # if len(argv) != 2:
-    #     return -1
-
-    # problem, robots = read_tsp(argv[1])
-    problem, robots = read_tsp(asset)
+import time
+def main(name_problem, after_name = ""):
+    problem, robots = read_tsp("assets/" + name_problem + ".tsp")
 
     print("\nRobots: ")
     print(robots)
@@ -21,19 +17,33 @@ def main(asset):
     print("\Problem: ")
     print(problem)
 
+    start_time = time.time()
     routes = som(problem, robots, 100000)
+    end_time = time.time()
     print("\nRoutes: ")
     print(routes)
 
+    time_run_alg = end_time - start_time
+
+    total_cost_robot = 0
     for robot in range(len(routes)):
         cost = cal_cost(routes[robot])
+        total_cost_robot = total_cost_robot + cost
         print("Cost of robot {} is: {}".format(robot, cost))
 
-    # Print thêm tổng số các đỉnh đã được tới thăm, điểm số nhận được
-    # Tổng quãng đường đã di chuyển của các con robot
-    # Tô màu city đã được thăm thành màu khác
-    plot_map_circle(problem, routes)
+    list_check = get_list_check_city(problem, routes)
+    number_city_visited = 0
+    total_score = 0
+    for i in range(len(list_check)):
+        if list_check[i]:
+            total_score = total_score + problem[i][3]
+            number_city_visited = number_city_visited + 1
 
+    # WRITE LOG AS: TIME_RUN / NUMBER_CITY_VISITED / TOTAL_SCORE / TOTAL_COST_ROBOT
+    with open("report/log_metric/" + name_problem + after_name + ".txt", "a") as f:
+        f.write("\n{}/{}/{}/{}".format(time_run_alg, number_city_visited, total_score, total_cost_robot))
+
+    plot_map_circle(problem, routes, list_check, "report/img_report/" + name_problem + after_name + ".jpg")
 
 def som(problem, robots, iterations, learning_rate=0.002):
     sigma = 1
@@ -46,8 +56,6 @@ def som(problem, robots, iterations, learning_rate=0.002):
     print(network)
 
     normalize(cities)
-    print("\nCities: ")
-    print(cities)
  
     number_city = len(cities)
     number_robot = len(robots)
@@ -115,4 +123,4 @@ def som(problem, robots, iterations, learning_rate=0.002):
 
 # if __name__ == '__main__':
 #     main()
-main("assets/qa194.tsp")
+main("map_3_150_hb")

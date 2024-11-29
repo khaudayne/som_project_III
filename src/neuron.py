@@ -8,12 +8,19 @@ def generate_network(robots, problem, multi = 2):
     number_robot = len(robots)
     number_waypoint = math.ceil(len(problem) / number_robot)
     network = [[]] * number_robot
+    size_city = len(problem)
+    check = [False] * size_city
     for i in range(number_robot):
+        idx = random.randint(0, size_city - 1)
+        while(check[idx]):
+            idx = random.randint(0, size_city - 1)
+        check[idx] = True
+
         tmp_list = []
         angle = 2 * math.pi / number_waypoint
-        radius = problem[i][2] * multi
+        radius = problem[idx][2] * multi
         for j in range(number_waypoint):
-            tmp_list.append([problem[i][0] + radius * math.sin(angle * j), problem[i][1] + radius * math.cos(angle * j)])
+            tmp_list.append([problem[idx][0] + radius * math.sin(angle * j), problem[idx][1] + radius * math.cos(angle * j)])
         network[i] = tmp_list
     return network
 
@@ -111,6 +118,14 @@ def regeneration(network, problem):
 
 
 def cal_score(problem, network):
+    check = get_list_check_city(problem, network)
+    score = 0
+    for i in range(len(problem)):
+        if check[i]:
+            score += problem[i][3]
+    return score
+
+def get_list_check_city(problem, network):
     check = [False] * len(problem)
     for i in range(len(network)):
         for j in range(len(network[i])):
@@ -123,9 +138,5 @@ def cal_score(problem, network):
                 sqr_dis = (way_point[0] - problem[k][0]) ** 2 + (way_point[1] - problem[k][1]) ** 2
                 if sqr_dis <= problem[k][2] * problem[k][2]:
                     check[k] = True
-    
-    score = 0
-    for i in range(len(problem)):
-        if check[i]:
-            score += problem[k][3]
-    return score
+
+    return check
