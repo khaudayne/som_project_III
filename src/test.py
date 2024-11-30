@@ -32,14 +32,14 @@ playerA = np.array([5, 15, 22, 20, 25])
 playerB = np.array([25, 32, 34, 30, 27])
 
 fig, ax = plt.subplots()
-hat_graph(ax, xlabels, [playerA, playerB], ['Player A', 'Player B'])
+# hat_graph(ax, xlabels, [playerA, playerB], ['Player A', 'Player B'])
+ax.bar(np.array([0.8, 1.2, 3, 4, 5]), playerB - playerA, 0.3, bottom=playerA, label=xlabels)
 
 # Add some text for labels, title and custom x-axis tick labels, etc.
-ax.set_xlabel('Games')
 ax.set_ylabel('Score')
 ax.set_ylim(0, 60)
-ax.set_title('Scores by number of game and players')
-ax.legend()
 
+ax.plot(np.array([0.1, 0.2]), np.array([3, 10]), linestyle = 'dotted')
+plt.gca().xaxis.set_visible(False)
 fig.tight_layout()
 plt.show()
