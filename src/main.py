@@ -4,14 +4,14 @@ import numpy as np
 import copy
 import random
 from io_helper import read_tsp, normalize
-from neuron import generate_network, adaption, regeneration, cal_score, get_list_check_city
+from neuron import generate_network, adaption, regeneration, cal_score, cal_list_score, get_list_check_city
 from distance import cal_cost
 from plot import plot_map_circle
 import time
 
 MAX_EPOCH = 50
 MAX_COST = 10000000000
-def main(name_problem, after_name = ""):
+def main(name_problem, is_after = False):
     problem, robots = read_tsp("assets/" + name_problem + ".tsp")
 
     print("\nRobots: ")
@@ -20,40 +20,40 @@ def main(name_problem, after_name = ""):
     print("\Problem: ")
     print(problem)
 
-    start_time = time.time()
-    routes = som(problem, robots, 100000)
-    end_time = time.time()
+    routes = som(problem, robots, 100000, is_after)
     print("\nRoutes: ")
     print(routes)
 
-    time_run_alg = end_time - start_time
 
     total_cost_robot = 0
+    list_cost_robot = []
     for robot in range(len(routes)):
         cost = cal_cost(routes[robot])
+        list_cost_robot.append(cost)
         total_cost_robot = total_cost_robot + cost
         print("Cost of robot {} is: {}".format(robot, cost))
 
-    list_check = get_list_check_city(problem, routes)
-    number_city_visited = 0
-    total_score = 0
-    for i in range(len(list_check)):
-        if list_check[i]:
-            total_score = total_score + problem[i][3]
-            number_city_visited = number_city_visited + 1
+    total_score, list_score, list_check = cal_list_score(problem, routes)
 
+    extend_key_check = "before_greedy"
+    if is_after:
+        extend_key_check = "after_greedy"
     # WRITE LOG AS: TIME_RUN / NUMBER_CITY_VISITED / TOTAL_SCORE / TOTAL_COST_ROBOT
-    with open("report/log_metric/" + name_problem + "_" + after_name + ".txt", "a") as f:
-        f.write("\n{}/{}/{}/{}".format(time_run_alg, number_city_visited, total_score, total_cost_robot))
+    with open("report/new_log/" + name_problem + ".txt", "a") as f:
+        f.write("\nLog metric " + extend_key_check +":\n")
+        f.write("List cost of robot is: " + str(list_cost_robot) + "\n")
+        f.write("Total cost of robot is: {}\n".format(total_cost_robot))
+        f.write("List reward of robot is: " + str(list_score) + "\n")
+        f.write("Total reward of robot is: {}".format(total_score))
 
-    plot_map_circle(problem, routes, list_check, "report/img_report/" + name_problem + "_" + after_name + ".jpg")
+    plot_map_circle(problem, routes, list_check, "report/new_img_report/" + name_problem  + "_" + extend_key_check + ".jpg")
 
-def som(problem, robots, iterations, learning_rate=0.002):
+def som(problem, robots, iterations, is_after, learning_rate=0.002):
     sigma = 1
     cities = copy.deepcopy(problem)
 
     # Tạo 1 network ~ con đường ngẫu nhiên của các robot lúc đầu
-    network = generate_network(robots, cities)
+    network = generate_network(robots, cities, is_after)
    
     print("\nNetwork: ")
     print(network)
@@ -91,7 +91,11 @@ def som(problem, robots, iterations, learning_rate=0.002):
             network_select_robot = []
             for robot in range(number_robot):
                 tmp_network = adaption(network[robot], city, sigma)
-                tmp_cost_robot = cal_cost(tmp_network) - cal_cost(network[robot])
+                tmp_cost_robot = None
+                if is_after:
+                    tmp_cost_robot = cal_cost(tmp_network) - cal_cost(network[robot])
+                else:
+                    tmp_cost_robot = cal_cost(tmp_network) / robots[robot][0]
                 # Thay đổi hàm để chọn robot
                 ## => Ưu tiên các con robot có sự thay đổi năng lượng ít hơn?
                 if cost_select_robot > tmp_cost_robot:
@@ -128,4 +132,4 @@ def som(problem, robots, iterations, learning_rate=0.002):
 
 # if __name__ == '__main__':
 #     main()
-main("map_3_150_hb", "after")
+main("map_3_150_lb", False)

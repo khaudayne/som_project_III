@@ -4,7 +4,7 @@ MAX_POS = 980
 MAX_RADIUS = 35
 MIN_RADIUS = 20
 MAX_SIZE = 1000
-MAX_REWARD = 10
+MAX_REWARD = 4
 MIN_REWARD = 1
 filename = "assets/circles.txt"
 with open(filename, "w") as file:

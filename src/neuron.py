@@ -3,26 +3,46 @@ import math
 import copy
 import random
 from distance import select_closest, find_nearest_way_point, find_nearest_path_point
+from sklearn.cluster import KMeans
 
-def generate_network(robots, problem, multi = 2):
+def generate_network(robots, problem, is_after, multi = 2, default_radius = 20):
     number_robot = len(robots)
     number_waypoint = math.ceil(len(problem) / number_robot)
     network = [[]] * number_robot
     size_city = len(problem)
-    check = [False] * size_city
-    for i in range(number_robot):
-        idx = random.randint(0, size_city - 1)
-        while(check[idx]):
-            idx = random.randint(0, size_city - 1)
-        check[idx] = True
 
-        tmp_list = []
-        angle = 2 * math.pi / number_waypoint
-        radius = problem[idx][2] * multi
-        for j in range(number_waypoint):
-            tmp_list.append([problem[idx][0] + radius * math.sin(angle * j), problem[idx][1] + radius * math.cos(angle * j)])
-        network[i] = tmp_list
+    if is_after:
+        center_region_list = find_center_region(problem, number_robot)
+        for i in range(number_robot):
+            tmp_list = []
+            angle = 2 * math.pi / number_waypoint
+            radius = default_radius
+            for j in range(number_waypoint):
+                tmp_list.append([center_region_list[i][0] + radius * math.sin(angle * j), center_region_list[i][1] + radius * math.cos(angle * j)])
+            network[i] = tmp_list
+    else:
+        check = [False] * size_city
+        for i in range(number_robot):
+            idx = random.randint(0, size_city - 1)
+            while(check[idx]):
+                idx = random.randint(0, size_city - 1)
+            check[idx] = True
+
+            tmp_list = []
+            angle = 2 * math.pi / number_waypoint
+            radius = problem[idx][2] * multi
+            for j in range(number_waypoint):
+                tmp_list.append([problem[idx][0] + radius * math.sin(angle * j), problem[idx][1] + radius * math.cos(angle * j)])
+            network[i] = tmp_list
+    
     return network
+
+## K_MEANS
+def find_center_region(problem, n_region):
+    converted_city = np.array(problem)[:, :2]
+    kmeans = KMeans(n_clusters=n_region, random_state=0)
+    kmeans.fit(converted_city)
+    return kmeans.cluster_centers_
 
 def generate_one_path(network, problem, multi = 2):
     number_robot = len(network)
@@ -124,6 +144,28 @@ def cal_score(problem, network):
         if check[i]:
             score += problem[i][3]
     return score
+
+def cal_list_score(problem, network):
+    check = [False] * len(problem)
+    total_score = 0
+    list_score = []
+    for i in range(len(network)):
+        tmp_score = 0
+        for j in range(len(network[i])):
+            way_point = network[i][j]
+            for k in range(len(problem)):
+                if check[k]:
+                    continue
+
+                #kiểm tra way_point có nằm trong region view_point của điểm cần quan sát hay không
+                sqr_dis = (way_point[0] - problem[k][0]) ** 2 + (way_point[1] - problem[k][1]) ** 2
+                if sqr_dis <= problem[k][2] * problem[k][2]:
+                    check[k] = True
+                    tmp_score += problem[k][3]
+        total_score += tmp_score
+        list_score.append(tmp_score)
+
+    return total_score, list_score, check
 
 def get_list_check_city(problem, network):
     check = [False] * len(problem)
