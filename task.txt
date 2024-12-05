@@ -1,0 +1,4 @@
+Vũ Thành Đông, Nguyễn Đình Khải
+So sánh trước và sau khi cải tiến thuật toán
+dr1, goadl r1 = ?, dr2, goadl r2 = ?, dr3, goadl r3 = ?
+Chạy với các trường hợp: số robot cố định số goal thay đổi (10,20,30,...300 goadl), số goal cố định số robot thay đổi

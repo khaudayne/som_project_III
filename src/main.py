@@ -132,4 +132,4 @@ def som(problem, robots, iterations, is_after, learning_rate=0.002):
 
 # if __name__ == '__main__':
 #     main()
-main("map_3_150_lb", False)
+main("map_1_10_lb", True)
