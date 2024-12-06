@@ -8,7 +8,7 @@ MAX_REWARD = 4
 MIN_REWARD = 1
 filename = "assets/circles.txt"
 with open(filename, "w") as file:
-    for _ in range(200):
+    for _ in range(50):
         x = round(random.uniform(MIN_POS, MAX_POS), 4)
         y = round(random.uniform(MIN_POS, MAX_POS), 4)
         r = round(random.uniform(MIN_RADIUS, MAX_RADIUS), 4)
