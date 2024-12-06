@@ -4,6 +4,7 @@ List cost of robot is: [4394.812677193017, 3330.719521275634]
 Total cost of robot is: 7725.532198468652
 List reward of robot is: [175.0, 58.0]
 Total reward of robot is: 233.0
+
 Log metric after_greedy:
 List cost of robot is: [4986.166353878125, 1519.5251255902235]
 Total cost of robot is: 6505.691479468349
