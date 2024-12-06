@@ -4,7 +4,7 @@ import matplotlib as mpl
 import create_circle
 import numpy as np
 
-LIST_COLOR = ["#011F82", "#00BAF7", "#D97903"]
+LIST_COLOR = ["#011F82", "#00BAF7", "#D97903", "#FB6F92", "#F2C84B"]
 COLOR_CIRCLE = "green"
 COLOR_CIRCLE_UNVISIT = "red"
 COLOR_POINT_CIRCLE = "red"
