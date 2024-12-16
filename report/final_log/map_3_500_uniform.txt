@@ -1,0 +1,11 @@
+
+Log metric before_greedy:
+List cost of robot is: [1198.8682272225587, 1197.7299682218643, 1199.3335029671925]
+Total cost of robot is: 3595.931698411616
+List reward of robot is: [167.0, 163.0, 173.0]
+Total reward of robot is: 503.0
+Log metric after_greedy:
+List cost of robot is: [1179.7715798185877, 1183.7951130607291, 1171.837527411518]
+Total cost of robot is: 3535.404220290835
+List reward of robot is: [159.0, 157.0, 123.0]
+Total reward of robot is: 439.0

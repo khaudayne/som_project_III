@@ -39,14 +39,14 @@ def main(name_problem, is_after = False):
     if is_after:
         extend_key_check = "after_greedy"
     # WRITE LOG AS: TIME_RUN / NUMBER_CITY_VISITED / TOTAL_SCORE / TOTAL_COST_ROBOT
-    with open("report/new_log/" + name_problem + ".txt", "a") as f:
+    with open("report/final_log/" + name_problem + ".txt", "a") as f:
         f.write("\nLog metric " + extend_key_check +":\n")
         f.write("List cost of robot is: " + str(list_cost_robot) + "\n")
         f.write("Total cost of robot is: {}\n".format(total_cost_robot))
         f.write("List reward of robot is: " + str(list_score) + "\n")
         f.write("Total reward of robot is: {}".format(total_score))
 
-    plot_map_circle(problem, routes, list_check, "report/new_img_report/" + name_problem  + "_" + extend_key_check + ".jpg")
+    plot_map_circle(problem, routes, list_check, "report/final_img_report/" + name_problem  + "_" + extend_key_check + ".jpg")
 
 def som(problem, robots, iterations, is_after, learning_rate=0.002):
     sigma = 1
@@ -132,4 +132,9 @@ def som(problem, robots, iterations, is_after, learning_rate=0.002):
 
 # if __name__ == '__main__':
 #     main()
-main("map_5_100_hb", True)
+
+for i in range(2, 6):
+    for j in range(200, 600, 100):
+        path = "map_" + str(i) + "_" + str(j) + "_gauss"
+        main(path, False)
+        main(path, True)

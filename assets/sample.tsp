@@ -1,0 +1,13 @@
+NAME : qa194
+COMMENT : 194 locations in Qatar
+COMMENT : Derived from National Imagery and Mapping Agency data
+TYPE : TSP
+ROBOT : 2
+DIMENSION : 100
+EDGE_WEIGHT_TYPE : EUC_2D
+ROBOT_BUDGET_SECTION
+1 1200
+2 1200
+NODE_COORD_SECTION
+
+EOF
