@@ -5,35 +5,36 @@ import random
 from distance import select_closest, find_nearest_way_point, find_nearest_path_point
 from sklearn.cluster import KMeans
 
-def generate_network(robots, problem, is_after, multi = 2, default_radius = 20):
+def generate_network(robots, problem, multi = 2, default_radius = 20):
     number_robot = len(robots)
     number_waypoint = math.ceil(len(problem) / number_robot)
     network = [[]] * number_robot
     size_city = len(problem)
 
-    if is_after:
-        center_region_list = find_center_region(problem, number_robot)
-        for i in range(number_robot):
-            tmp_list = []
-            angle = 2 * math.pi / number_waypoint
-            radius = default_radius
-            for j in range(number_waypoint):
-                tmp_list.append([center_region_list[i][0] + radius * math.sin(angle * j), center_region_list[i][1] + radius * math.cos(angle * j)])
-            network[i] = tmp_list
-    else:
-        check = [False] * size_city
-        for i in range(number_robot):
-            idx = random.randint(0, size_city - 1)
-            while(check[idx]):
-                idx = random.randint(0, size_city - 1)
-            check[idx] = True
+    # K-mean
+    center_region_list = find_center_region(problem, number_robot)
+    for i in range(number_robot):
+        tmp_list = []
+        angle = 2 * math.pi / number_waypoint
+        radius = default_radius
+        for j in range(number_waypoint):
+            tmp_list.append([center_region_list[i][0] + radius * math.sin(angle * j), center_region_list[i][1] + radius * math.cos(angle * j)])
+        network[i] = tmp_list
+    
+    # origin
+    # check = [False] * size_city
+    # for i in range(number_robot):
+    #     idx = random.randint(0, size_city - 1)
+    #     while(check[idx]):
+    #         idx = random.randint(0, size_city - 1)
+    #     check[idx] = True
 
-            tmp_list = []
-            angle = 2 * math.pi / number_waypoint
-            radius = problem[idx][2] * multi
-            for j in range(number_waypoint):
-                tmp_list.append([problem[idx][0] + radius * math.sin(angle * j), problem[idx][1] + radius * math.cos(angle * j)])
-            network[i] = tmp_list
+    #     tmp_list = []
+    #     angle = 2 * math.pi / number_waypoint
+    #     radius = problem[idx][2] * multi
+    #     for j in range(number_waypoint):
+    #         tmp_list.append([problem[idx][0] + radius * math.sin(angle * j), problem[idx][1] + radius * math.cos(angle * j)])
+    #     network[i] = tmp_list    
     
     return network
 
