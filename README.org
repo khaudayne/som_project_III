@@ -1,47 +1,86 @@
-#+TITLE:  Solving the Traveling Salesman Problem using Self-Organizing Maps
-#+AUTHOR: Diego Vicente Martín
-#+EMAIL:  mail@diego.codes
+#+TITLE:  TÌM ĐƯỜNG ĐA ĐÍCH ĐẾN CHO ROBOT TRONG MÔI TRƯỜNG KHÔNG VẬT CẢN BẰNG SOM KẾT HỢP K-MEAN
 
-This repository contains an implementation of a Self Organizing Map that can be
-used to find sub-optimal solutions for the Traveling Salesman Problem. The
-instances of the problems that the program supports are =.tsp= files, which is
-a widespread format in this problem. All the source code can be found in the
-=src= directory, while a report and brief presentation slides (in Spanish) can
-be found in the =report= folder. However, for a complete read on the topic, you
-can read [[https://diego.codes/post/som-tsp/][my blog post explaining this implementation and its evaluation]].
+[[file:algorithm.png]]
 
-[[file:diagrams/uruguay.gif]]
 
-To run the code, only Python 3 and the dependencies (=matplotlib=, =numpy= and =pandas=,
-which are included in the Anaconda distribution by default) are needed. In case
-you are not using Anaconda, you can install all the dependencies with:
+* Các thành phần chính của giải thuật
+** K - MEAN
+Xác định tâm R cụm (R là số lượng của robot) trong không gian bài toán với các điểm là tâm các vùng đích đến bằng thuật toán K-mean: cluster_centers_ (cc).
 
-#+BEGIN_SRC sh
-pip install -r requirements.txt
-#+END_SRC
+Ở mỗi tâm cụm cci , tạo một đa giác đều quanh tâm cụm, mỗi đỉnh trên đa giác cách đều tâm cụm một khoảng bằng default_radius (param), số cạnh của đa giác được xác định bằng công thức:
+n_{polygon} = [N/R].
 
-To run the code, simply execute:
+Trong đó N là số lượng các đích đến, R là số lượng robot. Số lượng waypoint trong mỗi network của robot đảm các các con robot có thể đi thăm được tối đa các đích đến (nếu đủ năng lượng).
 
-#+BEGIN_SRC sh
-cd som-tsp
-python src/main.py assets/<instance>.tsp
-#+END_SRC
+** Thuật toán SOM
+Một thuật toán học máy giúp mạng được tạo ra tự điều chỉnh các node của mình tới các node của dataset của bài toán.
 
-The images generated will be stored in the =diagrams= folder. Using a tool like
-=convert=, you can easily generate an animation like the one in this file by
-running:
+Thuật toán dựa trên việc tìm ra một node gần nhất trong mạng so với một node trong dataset đang xét. Từ đó có thể dịch chuyển toàn bộ mạng về phía node trong dataset đấy.
+Đối với các điểm nào nằm càng gần node gần nhất (tức best matching unit) trong mạng, khoảng cách dịch chuyển sẽ càng nhiều hơn.
 
-#+BEGIN_SRC sh
-convert -delay 10 -loop 0 *.png animation.gif
-#+END_SRC
-
-This code is licensed under MIT License, so feel free to modify and/or use it
-in your projects. If you have any doubts, feel free to contact me or contribute
-to this repository by creating an issue.
+** Thuật toán tái tạo mạng: REGENERATION
+Sau khi các node trong mạng đã được điều chỉnh dịch chuyển vị trí. Để có thể làm giảm tổng chi phí di chuyển qua mạng cũng như xóa các node không quan trọng (trong bài toán này là các node không nằm trên vùng quan sát nào), thuật toán sẽ tiến hành tái tạo lại mạng này, rồi trả về để tiếp tục huấn luận trong các vòng lặp sau.
 
 -----
 
-This code was presented for the Bio-Inspired Artificial Intelligence course in
-the Computer Science & Technology master's degree @ UC3M. A previous version of
-this code can be found in [[https://github.com/DiegoVicen/ntnu-som][this repository]]. Special thanks to [[https://github.com/leo-labs][Leonard Kleinans]],
-who worked with me in that previous version.
+* Ý tưởng tổng quát
+Thuật toán sẽ tiến hành huấn luyện mạng qua các epoch, với đầu vào là thông tin của môi trường cũng như robot (Định nghĩa ở phần Yêu cầu kĩ thuật).
+
+Các con robot sẽ được tạo ra network ban đầu ngẫu nhiên, xung quanh vị trí được tìm thấy bởi thuật toán K-MEAN.
+
+Trong mỗi Epoch, các vùng quan sát sẽ lần lượt được xét. Với mỗi vùng quan sát, duyệt qua từng con robot, và thực hiện thuật toán SOM để điều chỉnh network của robot theo vùng quan sát đó.
+Con robot thích hợp nhất sẽ đuộc chọn để thay đổi network ở cuối vòng lặp, các con robot khác giữ nguyên state cũ.
+Sau khi duyệt hết tất cả vùng quan sát, thuật toán Regeneration sẽ dược áp dụng nhằm loại bỏ đi các điểm dư thừa, tối ưu lời giải bài toán.
+
+* Yêu cầu kĩ thuật
+** Cài đặt các thư viện cần thiết
+Thư viện numpy:
+#+BEGIN_SRC sh
+pip install numpy
+#+END_SRC
+
+Thư viện pandas:
+#+BEGIN_SRC sh
+pip install pandas
+#+END_SRC
+
+Thư viện scikit-learn, sử dụng K-MEAN:
+#+BEGIN_SRC sh
+pip install scikit-learn
+#+END_SRC
+
+Thư viện matplotlib:
+#+BEGIN_SRC sh
+pip install matplotlib
+#+END_SRC
+
+-----
+
+** Tạo các map để chạy chương trình
+Các map sẽ có định dạng: 
+#+BEGIN_SRC txt
+ROBOT : 2
+DIMENSION : 200
+ROBOT_BUDGET_SECTION
+// Thông tin của robot: {STT (int), budget (float)} , ngăn cách bởi dấu xuống dòng
+NODE_COORD_SECTION
+// Thông tin của các vùng quan sát: {STT (int), x (float), y (float), radius (float), reward (int)} , ngăn cách bởi dấu xuống dòng
+EOF
+#+END_SRC
+
+Các file sẽ được lưu trong folder /assets.
+* Chạy thử nghiệm
+Trong file main.py, dòng 138:
+
+#+BEGIN_SRC py
+for i in range(number_run_algorithm):
+    main(name_map, name_log)
+#+END_SRC
+
+Có thể thay đổi các param để đạt được kết quả mong muốn.
+- number_run_algorithm: số lần chạy thuật toán (tương ứng với số dòng cần log data sau khi chạy).
+- name_map: tên file .tsp map vừa tạo (không bao gồm ".tsp", VD: "map_200goals").
+- name_log: đặt tên các file log tránh bị trùng nhau sau các lần chạy thuật toán.
+
+
+
