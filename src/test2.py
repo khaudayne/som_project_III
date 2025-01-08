@@ -4,7 +4,7 @@ l2 = []
 l3 = []
 
 # Đọc dữ liệu từ file origin.txt
-with open("report/log_100/mix.txt", "r") as file:
+with open("report/log_100/hb_mix.txt", "r") as file:
     data = file.readlines()
     for line in data:
         tmp = list(map(float, line.strip().split()))

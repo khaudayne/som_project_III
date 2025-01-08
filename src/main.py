@@ -54,11 +54,11 @@ def som(problem, robots, iterations, learning_rate=0.002):
     network = generate_network(robots, cities)
    
     print("\nNetwork: ")
-    print(network)
+    print(network) 
 
     #Greedy
-    cities.sort(key=lambda x: x[3], reverse=True)
-    # normalize(cities)
+    # cities.sort(key=lambda x: x[3], reverse=True)
+    normalize(cities)
 
  
     number_city = len(cities)
@@ -81,10 +81,11 @@ def som(problem, robots, iterations, learning_rate=0.002):
             print('\t> Iteration {}/{}'.format(i, iterations), end="\r")
         
         # Permutation các thành phố
-        # per = list(range(number_city))
-        # random.shuffle(per)
+        per = list(range(number_city))
+        random.shuffle(per)
         for j in range(number_city):
-            city = cities[j]
+            city = cities[per[j]]
+            # city = cities[j]
 
             # Các biến lưu lại giá trị cần thiết của robot có path tốt nhất
             idx_select_robot = -1
@@ -134,5 +135,5 @@ def som(problem, robots, iterations, learning_rate=0.002):
 # if __name__ == '__main__':
 #     main()
 
-for i in range(1):
-    main("map_5_200_uniform", "greedy_mix")
+for i in range(100):
+    main("map_5_200_uniform", "hb_mix")
